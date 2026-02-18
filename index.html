@@ -1,1 +1,547 @@
-Hello World
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notre Hiver Canadien ❤️</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:#0f2027;
+color:white;
+display:flex;
+flex-direction:column;
+height:100vh;
+overflow:hidden;
+}
+
+
+
+
+
+header{
+padding:15px;
+text-align:center;
+background:#1c2b36;
+font-weight:600;
+}
+
+button{
+background:#00d4ff;
+border:none;
+padding:8px 12px;
+border-radius:6px;
+cursor:pointer;
+font-size:12px;
+}
+
+.container{
+flex:1;
+display:flex;
+overflow:hidden;
+}
+
+#map{
+flex:1;
+transition:height 0.5s ease;
+}
+
+.timeline{
+width:200px;
+background:#16222a;
+overflow-y:auto;
+padding:20px 15px;
+position:relative;
+}
+
+.timeline-line{
+position:absolute;
+left:15px;
+top:0;
+width:4px;
+height:100%;
+background:rgba(255,255,255,0.1);
+}
+
+.timeline-progress{
+position:absolute;
+left:15px;
+top:0;
+width:4px;
+height:0%;
+background:#00d4ff;
+transition:height 0.5s ease;
+}
+
+.step{
+position:relative;
+margin-bottom:25px;
+padding-left:35px;
+cursor:pointer;
+font-size:13px;
+}
+
+.dot{
+position:absolute;
+left:8px;
+top:3px;
+width:14px;
+height:14px;
+border-radius:50%;
+background:#777;
+}
+
+.step.passed .dot{background:#2ecc71;}
+.step.current .dot{background:#00d4ff;}
+.step.future .dot{background:#555;}
+
+.blog{
+height:0;
+background:white;
+color:#333;
+overflow:auto;
+transition:height 0.5s ease;
+padding:0 25px;
+}
+
+.blog.active{
+height:30vh;
+padding:25px;
+}
+
+.blog img{
+width:100%;
+border-radius:10px;
+margin-top:10px;
+}
+
+@media(max-width:768px){
+.timeline{width:50px;}
+
+}
+
+
+</style>
+</head>
+<body>
+
+<header>
+❄️ Notre Hiver Canadien ❤️
+<!--<button onclick="replayJourney()">Revoir notre voyage jusqu'à présent</button>-->
+</header>
+
+<div class="container">
+<div class="timeline" id="timeline">
+<div class="timeline-line"></div>
+<div class="timeline-progress" id="progressLine"></div>
+</div>
+<div id="map"></div>
+</div>
+
+<div class="blog" id="blog"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+let routeLine = null;
+let highlightCircle = null;
+
+
+
+var map=L.map('map').setView([46.8,-71.2],8);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+const carIcon=L.icon({
+iconUrl:"logo1.png",
+iconSize:[64,64]
+});
+
+
+function setActiveMarker(index){
+
+    if(highlightCircle){
+        map.removeLayer(highlightCircle);
+    }
+
+    const coords = stops[index].coords;
+
+    highlightCircle = L.circle(coords, {
+        radius: 3000,
+        color: '#0Fd4ff',
+        fillColor: '#0Fd4ff',
+        fillOpacity: 0.6,
+        weight: 10
+    }).addTo(map);
+
+}
+
+
+
+
+const stops=[
+
+{
+t: " ✈️ ",
+date:"2026-02-19",
+label:"Départ ✈️",
+desc:"",
+coords:[48.866667,2.333333]
+},
+{
+t: " ✈️ ",
+date:"2026-02-20",
+label:"Arrivée à Montréal ✈️",
+desc:"",
+coords:[45.4706,-73.7408]
+},
+{
+t:" 🐕",
+date:"2026-02-22",
+label:"Traîneau à chiens & motoneige 🐕",
+coords:[45.9835,-73.8850],
+desc:"Chiens de traîneau, repas traditionnel, motoneige et spa nordique.",
+},
+{
+t: " ⛸️",
+date:"2026-02-25",
+label:"Domaine Enchanteur ⛸️",
+coords:[46.4766,-72.6419],
+desc:"Patinage en forêt et parc animaler."
+},
+{
+t: " 🏡",
+date:"2026-02-25",
+label:"Trois-Rivières 🏡",
+coords:[46.3430,-72.5439],
+desc:"Petite ville au bord d'un lac."
+},
+{
+t: " 🚌",
+date:"2026-02-27",
+label:"Départ pour Québec 🚌",
+coords:[46.8139,-71.2080],
+desc:""
+},
+{
+t: " 🌊",
+date:"2026-02-28",
+label:"Chutes de Montmorency   🌊",
+coords:[46.8900,-71.1470],
+desc:""
+},
+{
+t: "❄️",
+date:"2026-03-02",
+label:"Visite de l'Hôtel de Glace ❄️",
+desc:"",
+coords:[46.8767,-71.3234],
+},
+{
+t: "♨️",
+date:"2026-03-03",
+label:"Siberia Spa ♨️",
+coords:[46.9116,-71.3733],
+desc:"Spa nordique en forêt"
+},
+{
+t: "🚌",
+date:"2026-03-05",
+label:"Retour à Montréal 🚌",
+coords:[45.5017,-73.5673],
+desc:""
+},
+{
+t: "🎿",
+date:"2026-03-06",
+label:"Ski au domaine de Montcalm 🎿",
+coords:[46.0333,-73.9667],
+desc:""
+},
+{
+t: "🛍️",
+date:"2026-03-07",
+label:"Shopping 🛍️",
+coords:[45.5017,-73.5673],
+desc:""
+},
+{
+t: "✈️",
+date:"2026-03-08",
+label:"Retour en France ✈️",
+coords:[45.4706,-73.7408],
+desc:"Fin de l’aventure."
+}
+];
+
+let markers=[];
+let carMarker=L.marker(stops[0].coords,{icon:carIcon}).addTo(map);
+
+const timeline=document.getElementById("timeline");
+const progressLine=document.getElementById("progressLine");
+const blog=document.getElementById("blog");
+
+function getCanadaToday(){
+return new Date().toLocaleString("en-US",{timeZone:"America/Toronto"});
+}
+
+const today=new Date(getCanadaToday());
+
+function updateProgress(){
+let passedCount=0;
+
+stops.forEach((stop,i)=>{
+let stopDate=new Date(stop.date);
+let step=document.querySelectorAll(".step")[i];
+
+if(today>stopDate){
+step.classList.add("passed");
+passedCount++;
+}else if(today.toDateString()===stopDate.toDateString()){
+step.classList.add("current");
+}else{
+step.classList.add("future");
+}
+});
+
+let percent=(passedCount/(stops.length-1))*100;
+progressLine.style.height=percent+"%";
+}
+
+
+function getCurrentIndex(){
+    let currentIndex = 0;
+
+    for(let i=0; i<stops.length; i++){
+        let stopDate = new Date(stops[i].date);
+
+        if(today >= stopDate){
+            currentIndex = i;
+        } else {
+            break;
+        }
+    }
+
+    return currentIndex;
+}
+
+function initMapPosition(){
+    const index = getCurrentIndex();
+
+    map.flyTo(stops[index].coords, 7);
+    markers[index].openPopup();
+    carMarker.setLatLng(stops[index].coords);
+}
+
+
+
+
+
+
+function goToStep(index){
+map.flyTo(stops[index].coords,10);
+    if(window.innerWidth <= 768){
+        openBlog(index);
+    } else {
+        markers[index].openPopup();
+    }
+}
+
+function openBlog(index){
+setActiveMarker(index); 
+map.closePopup();
+    if(window.innerWidth > 768){
+	    // if(!stops[index].description_full) return;
+    }
+
+blog.innerHTML=`
+<h2>${stops[index].label}</h2>
+<h3>${stops[index].date}</h3>
+<p>${stops[index].description_full ?? ""}</p>
+`;
+blog.classList.add("active");
+document.getElementById("map").style.height="60vh";
+}
+
+stops.forEach((stop,index)=>{
+
+let popupContent=`
+<b>${stop.label}</b><br>
+<b>${stop.date}</b><br>
+<p>${stop.desc}</p>
+${stop.description_full ? `<button onclick="openBlog(${index})">Lire le récit</button>`:''}
+`;
+
+let marker=L.marker(stop.coords).addTo(map); //.bindPopup(popupContent);
+
+if(window.innerWidth > 768){
+    marker.bindPopup(popupContent);
+} else {
+    marker.on("click", ()=>{
+        goToStep(index);
+    });
+}
+markers.push(marker);
+
+let div=document.createElement("div");
+div.className="step";
+
+function getTimelineText(stop){
+    if(window.innerWidth <= 768){
+        return stop.t;
+    }
+    return stop.label;
+}
+div.innerHTML=`<div class="dot"></div>${getTimelineText(stop)}`;
+div.onclick=()=>goToStep(index);
+timeline.appendChild(div);
+
+// resize
+function refreshTimelineText(){
+    document.querySelectorAll(".step").forEach((step,index)=>{
+        step.innerHTML = `<div class="dot"></div>${getTimelineText(stops[index])}`;
+    });
+}
+window.addEventListener("resize", refreshTimelineText);
+
+
+});
+
+updateProgress();
+initMapPosition();
+// animateToCurrentStep();
+
+
+function replayJourney(){
+let passedStops=stops.filter(s=>today>new Date(s.date));
+let i=0;
+
+function next(){
+if(i>=passedStops.length) return;
+goToStep(i);
+if(i>0){
+animateCar(stops[i-1].coords,stops[i].coords);
+}
+i++;
+setTimeout(next,1800);
+}
+next();
+}
+
+function animateCarLine(start,end,duration=1500){
+
+    let startTime=null;
+
+    // Supprime ancienne ligne si elle existe
+    if(routeLine){
+        map.removeLayer(routeLine);
+    }
+
+routeLine = L.polyline([start], {
+    color: '#00d4ff',
+    weight: 4,
+    opacity: 0.9,
+    dashArray: '8 8'
+}).addTo(map);
+
+    function animate(currentTime){
+
+        if(!startTime) startTime=currentTime;
+
+        let progress=(currentTime-startTime)/duration;
+        if(progress>1) progress=1;
+
+        let lat=start[0]+(end[0]-start[0])*progress;
+        let lng=start[1]+(end[1]-start[1])*progress;
+
+        let currentPos=[lat,lng];
+
+        // Déplace la voiture
+        carMarker.setLatLng(currentPos);
+
+        // Met à jour la ligne progressivement
+        // routeLine.setLatLngs([start,currentPos]);
+
+	let existingLatLngs = routeLine.getLatLngs();
+	routeLine.setLatLngs([...existingLatLngs, currentPos]);
+
+
+        if(progress<1){
+            requestAnimationFrame(animate);
+        }
+    }
+
+    requestAnimationFrame(animate);
+}
+
+
+
+
+
+function animateCar(start,end,duration=1500){
+let startTime=null;
+function animate(currentTime){
+if(!startTime)startTime=currentTime;
+let progress=(currentTime-startTime)/duration;
+if(progress>1)progress=1;
+let lat=start[0]+(end[0]-start[0])*progress;
+let lng=start[1]+(end[1]-start[1])*progress;
+carMarker.setLatLng([lat,lng]);
+if(progress<1)requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+}
+
+function animateToCurrentStep(){
+    const currentIndex = getCurrentIndex();
+
+    if(currentIndex === 0){
+        // Rien à animer, on est au début
+        map.flyTo(stops[0].coords,10);
+//        markers[0].openPopup();
+if(window.innerWidth <= 768){
+    openBlog(0);
+} else {
+    markers[0].openPopup();
+}
+
+
+        carMarker.setLatLng(stops[0].coords);
+        return;
+    }
+
+    let i = 0;
+
+    function next(){
+        if(i > currentIndex) return;
+
+        map.flyTo(stops[i].coords,10);
+//        markers[i].openPopup();
+if(window.innerWidth <= 768){
+    openBlog(i);
+} else {
+    markers[i].openPopup();
+}
+
+        if(i > 0){
+            animateCarLine(stops[i-1].coords, stops[i].coords);
+        } else {
+            carMarker.setLatLng(stops[0].coords);
+        }
+
+        i++;
+        setTimeout(next,1700);
+    }
+
+    next();
+}
+
+
+
+
+
+</script>
+</body>
+</html>
+
