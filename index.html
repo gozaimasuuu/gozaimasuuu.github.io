@@ -358,7 +358,7 @@ map.closePopup();
 blog.innerHTML=`
 <h2>${stops[index].label}</h2>
 <h3>${stops[index].date}</h3>
-<p>${stops[index].description_full ?? stops[index].description ?? ""}</p>
+<p>${stops[index].description_full ?? stops[index].desc ?? ""}</p>
 `;
 blog.classList.add("active");
 document.getElementById("map").style.height="60vh";
