@@ -334,10 +334,11 @@ function getCurrentIndex(){
 }
 
 function initMapPosition(){
-    const index = getCurrentIndex();
-
+   // const index = getCurrentIndex();
+    const index = 0;
     map.flyTo(stops[index].coords, 7);
     markers[index].openPopup();
+	goToStep(index);
     carMarker.setLatLng(stops[index].coords);
 }
 
