@@ -339,7 +339,7 @@ function initMapPosition(){
     map.flyTo(stops[index].coords, 7);
     markers[index].openPopup();
 	goToStep(index);
-    carMarker.setLatLng(stops[index].coords);
+    carMarker.setLatLng(stops[getCurrentIndex()].coords);
 }
 
 
